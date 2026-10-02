@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cognitive practice — 12 minutes</title>
+<style>
+  :root {
+    --ink: #1c2430;
+    --muted: #5c6778;
+    --line: #d9dee7;
+    --bg: #f3f5f8;
+    --card: #fff;
+    --ok: #137333;
+    --ok-bg: #e6f4ea;
+    --bad: #b3261e;
+    --bad-bg: #fce8e6;
+    --accent: #1a4f8b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding-top: 44px;
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.45;
+  }
+  #clock {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 4;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    height: 44px;
+    padding: 0 20px;
+    background: #fff;
+    border-bottom: 1px solid var(--line);
+  }
+  #progress { font-weight: 650; }
+  .clock-side { display: flex; align-items: baseline; gap: 8px; }
+  .clock-label {
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-weight: 650;
+  }
+  header {
+    background: #fff;
+    border-bottom: 1px solid var(--line);
+    padding: 14px 20px 12px;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  h1 { font-size: 1.25rem; margin: 0 0 4px; font-weight: 650; }
+  .lede { margin: 0; color: var(--muted); font-size: 0.92rem; }
+  .bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    align-items: center;
+    margin-top: 10px;
+  }
+  button.action, button.choice {
+    font: inherit;
+    cursor: pointer;
+  }
+  button.action {
+    background: var(--accent);
+    color: #fff;
+    border: 0;
+    border-radius: 8px;
+    padding: 8px 12px;
+  }
+  button.action.secondary { background: #fff; color: var(--ink); border: 1px solid var(--line); }
+  #timer {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    font-size: 1.35rem;
+    min-width: 4.2ch;
+  }
+  #timer.done { color: var(--bad); }
+  #score { color: var(--muted); }
+  main { padding: 18px 20px 48px; }
+  .reveal-row { margin-top: 8px; }
+  #next { width: 100%; }
+  button.action:disabled { opacity: 0.65; cursor: default; }
+  article {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 16px 12px;
+    margin: 0 0 12px;
+  }
+  .tag {
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 4px;
+  }
+  .prompt { margin: 0 0 10px; font-size: 1.05rem; white-space: pre-wrap; }
+  img.figure { display: block; max-width: 100%; height: auto; margin: 0 0 10px; background: #fff; border: 1px solid var(--line); border-radius: 8px; }
+  .choices { display: flex; flex-direction: column; gap: 8px; }
+  button.choice {
+    text-align: left;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  button.choice:hover:not(:disabled) { border-color: var(--accent); }
+  button.choice.selected { border-color: var(--accent); background: #e8f0fa; }
+  button.choice:disabled { cursor: default; }
+  button.choice.correct { background: var(--ok-bg); border-color: var(--ok); color: var(--ok); }
+  button.choice.wrong { background: var(--bad-bg); border-color: var(--bad); color: var(--bad); }
+  .why { margin: 10px 0 0; font-size: 0.92rem; }
+  .why.ok { color: var(--ok); }
+  .why.bad { color: var(--bad); }
+  .mark { font-weight: 700; }
+  #results {
+    width: min(640px, calc(100% - 32px));
+    max-height: min(80vh, 720px);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px 18px 14px;
+    color: var(--ink);
+  }
+  #results::backdrop { background: rgba(28, 36, 48, 0.45); }
+  #results h2 { margin: 0; font-size: 1.15rem; }
+  #results h3 { margin: 14px 0 6px; font-size: 0.95rem; }
+  #results .summary { margin: 6px 0 0; color: var(--muted); }
+  #results .sheet { overflow: auto; max-height: calc(80vh - 140px); margin-top: 4px; }
+  #results .item { margin: 0 0 12px; }
+  #results .item p { margin: 0; }
+  #results .you { color: var(--bad); }
+  #results .key { color: var(--ok); }
+  #results .close { margin-top: 12px; }
+</style>
+</head>
+<body>
+<div id="clock">
+  <span id="progress"></span>
+  <span class="clock-side">
+    <span class="clock-label">Time left</span>
+    <span id="timer" aria-live="polite">12:00</span>
+  </span>
+</div>
+<header id="intro">
+  <div class="wrap">
+    <h1>Cognitive practice</h1>
+    <p class="lede">50 questions, 12 minutes, no calculator. One question at a time. Change your choice before Next. You cannot go back. At 0:00 the section ends.</p>
+    <div class="bar">
+      <button class="action" id="start" type="button">Start 12:00</button>
+      <button class="action secondary" id="reset" type="button">Reset</button>
+      <button class="action secondary" id="again" type="button" hidden>Practice seen questions again</button>
+      <span id="score"></span>
+    </div>
+  </div>
+</header>
+<main>
+  <div class="wrap" id="list"></div>
+  <div class="wrap reveal-row" id="nav" hidden>
+    <button class="action" id="next" type="button">Next</button>
+  </div>
+</main>
+<dialog id="results">
+  <h2>Results</h2>
+  <p class="summary" id="results-summary"></p>
+  <div class="sheet">
+    <h3>Wrong</h3>
+    <div id="results-wrong"></div>
+    <h3>Correct</h3>
+    <div id="results-right"></div>
+  </div>
+  <form method="dialog">
+    <button class="action close" type="submit">Close</button>
+  </form>
+</dialog>
+<script src="exam/extra-1000.js"></script>
+<script>
+const list = document.getElementById("list");
+const score = document.getElementById("score");
+const timerEl = document.getElementById("timer");
+const startBtn = document.getElementById("start");
+const resetBtn = document.getElementById("reset");
+const nextBtn = document.getElementById("next");
+const nav = document.getElementById("nav");
+const intro = document.getElementById("intro");
+const progress = document.getElementById("progress");
+const againBtn = document.getElementById("again");
+const lede = document.querySelector(".lede");
+let questions = [];
+let remaining = 12 * 60;
+let tick = null;
+let cursor = 0;
+let current = 0;
+let finished = false;
+const letters = ["A", "B", "C", "D", "E", "F"];
+const SEEN_KEY = "cognitive-practice-seen";
+
+function loadSeen() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(SEEN_KEY) || "[]");
+    return new Set(Array.isArray(raw) ? raw : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function saveSeen(set) {
+  try {
+    localStorage.setItem(SEEN_KEY, JSON.stringify([...set]));
+  } catch {
+    // The page still skips finished questions until it is closed.
+  }
+}
+
+function shuffle(items) {
+  const copy = items.slice();
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+let seen = loadSeen();
+function isUsaKnowledge(q) {
+  return /oklahoma|how many states are there in the u\.s/i.test(q.prompt);
+}
+const BANK = (typeof EXTRA === "undefined" ? [] : EXTRA).filter(q => !isUsaKnowledge(q));
+let queue = shuffle(BANK.filter(q => !seen.has(q.prompt)));
+
+function writeLede() {
+  const left = queue.length - cursor;
+  if (!left) {
+    lede.textContent = `Every question has already shown its answer. Practice seen questions again to reshuffle the full pool of ${BANK.length}.`;
+    return;
+  }
+  lede.textContent = `50 questions, 12 minutes, no calculator. One question at a time, easier ones first. ${left} questions have not shown you an answer yet. A finished sitting stays out on the next run. Change your choice before Next. You cannot go back. At 0:00 the section ends.`;
+}
+
+function difficulty(q) {
+  const p = q.prompt.toLowerCase();
+  const words = p.split(/\s+/).filter(Boolean).length;
+  let score = 28 + Math.min(words, 70) * 0.4;
+  if (/\bopposite\b/.test(p) && words < 28) score -= 16;
+  if (/\b(means|most nearly)\b/.test(p) && words < 22) score -= 12;
+  if (/(smallest|largest)/.test(p) && words < 16) score -= 14;
+  if (/month of the year|how many states|biggest diameter|letter of the english alphabet/.test(p)) score -= 18;
+  if (/\bdivided by\b/.test(p) && words < 12) score -= 14;
+  if (/\bwhat is\b/.test(p) && words < 16) score -= 10;
+  if (/(\d+\/\d+|% of|percent of)/.test(p) && words < 20) score -= 8;
+  if (/(altogether|how much do|change should|sale price|half price)/.test(p) && words < 26) score -= 8;
+  if (/(miles per hour|per minute|per hour|in one hour|at the same rate)/.test(p)) {
+    score -= words < 22 ? 16 : words < 32 ? 8 : 0;
+  }
+  const series = /next number|comes next|fills the blank/.test(p);
+  if (series && words < 28 && !/alternating/.test(p)) score -= 18;
+  if (/^to \w+ is to/.test(p)) score -= 10;
+  if (/have _+ meanings/.test(p)) score -= 12;
+  if (/correctly completes the sentence/.test(p)) score -= 12;
+  if (/(does not belong|different from the others)/.test(p) && words < 22) score -= 6;
+  if (/day before the day before/.test(p)) score += 10;
+  if (/working together/.test(p)) score += 8;
+  if (/encounter the digit/.test(p)) score += 6;
+  const nums = (p.match(/\d+(?:\.\d+)?/g) || []).length;
+  if (!series && nums >= 4) score += 8;
+  if (!series && nums >= 7) score += 8;
+  if (/assume the first|is the final statement|if the first two|if the statement/.test(p)) score += 16;
+  if (q.images && q.images.length) score += 18;
+  if (/fold|cube|surface area|volume of a/.test(p)) score += 12;
+  if (/which three|proverbs have similar/.test(p)) score += 8;
+  if ((q.prompt.match(/\b[A-Z]{8,}\b/g) || []).length) score += 6;
+  if (words <= 14 && nums <= 3) score -= 6;
+  return score;
+}
+
+function takeNext() {
+  const picked = [];
+  while (cursor < queue.length && picked.length < 50) {
+    const q = queue[cursor];
+    cursor += 1;
+    picked.push({
+      tag: q.tag || "Practice",
+      prompt: q.prompt,
+      choices: q.choices.slice(),
+      answerText: q.answer,
+      answer: -1,
+      why: q.why || "",
+      images: (q.images || []).slice(),
+      picked: null,
+      revealed: false
+    });
+  }
+  picked.sort((a, b) => difficulty(a) - difficulty(b));
+  return picked;
+}
+
+function buildCard(q, i) {
+  const card = document.createElement("article");
+  const tag = document.createElement("p");
+  tag.className = "tag";
+  tag.textContent = finished
+    ? `${q.tag} · ${i + 1} of ${questions.length}`
+    : `Question ${i + 1} of ${questions.length}`;
+  const prompt = document.createElement("p");
+  prompt.className = "prompt";
+  prompt.textContent = q.prompt;
+  const figures = (q.images || []).map((src) => {
+    const img = document.createElement("img");
+    img.className = "figure";
+    img.src = src;
+    img.alt = "Question figure";
+    return img;
+  });
+  const choices = document.createElement("div");
+  choices.className = "choices";
+  q.choices.forEach(() => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "choice";
+    button.addEventListener("click", () => choose(q, choices, button));
+    choices.appendChild(button);
+  });
+  const why = document.createElement("p");
+  why.className = "why";
+  why.hidden = true;
+  card.append(tag, prompt, ...figures, choices, why);
+  q.card = card;
+  q.whyEl = why;
+  deal(q);
+  paint(q);
+  return card;
+}
+
+function showCurrent() {
+  list.replaceChildren(buildCard(questions[current], current));
+  progress.textContent = `Question ${current + 1} of ${questions.length}`;
+  nextBtn.textContent = current === questions.length - 1 ? "End the Test" : "Next";
+  nav.hidden = false;
+  intro.hidden = true;
+}
+
+function showReview() {
+  list.replaceChildren();
+  questions.forEach((q, i) => list.appendChild(buildCard(q, i)));
+  nav.hidden = true;
+  intro.hidden = false;
+  progress.textContent = "";
+}
+
+function deal(q) {
+  if (!q.shown) {
+    const shown = q.choices.slice();
+    for (let i = shown.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shown[i], shown[j]] = [shown[j], shown[i]];
+    }
+    q.shown = shown;
+    q.answer = shown.indexOf(q.answerText);
+  }
+  q.card.querySelectorAll("button.choice").forEach((button, j) => {
+    button.textContent = `${letters[j]}. ${q.shown[j]}`;
+  });
+}
+
+function paint(q) {
+  const right = q.picked === q.answer;
+  q.card.querySelectorAll("button.choice").forEach((button, j) => {
+    button.disabled = q.revealed;
+    button.classList.toggle("selected", !q.revealed && q.picked === j);
+    button.classList.toggle("correct", q.revealed && j === q.answer);
+    button.classList.toggle("wrong", q.revealed && q.picked === j && j !== q.answer);
+  });
+  if (!q.revealed) {
+    q.whyEl.hidden = true;
+    q.whyEl.className = "why";
+    q.whyEl.textContent = "";
+    return;
+  }
+  const mark = q.picked === null ? "Answer." : (right ? "Correct." : "Wrong.");
+  const tone = q.picked !== null && !right ? "bad" : "ok";
+  q.whyEl.hidden = false;
+  q.whyEl.className = `why ${tone}`;
+  q.whyEl.innerHTML = `<span class="mark">${mark}</span>${q.why ? " " + escapeHtml(q.why) : ""}`;
+}
+
+function escapeHtml(text) {
+  return text.replace(/[&<>]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[ch]));
+}
+
+function choose(q, choices, button) {
+  if (q.revealed || finished) return;
+  q.picked = [...choices.children].indexOf(button);
+  paint(q);
+}
+
+function updateScore() {
+  const correct = questions.filter(q => q.picked === q.answer).length;
+  score.textContent = `${correct} / ${questions.length} correct`;
+}
+
+function format(seconds) {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${String(s).padStart(2, "0")}`;
+}
+
+function stopTimer() {
+  if (tick) clearInterval(tick);
+  tick = null;
+  remaining = 12 * 60;
+  timerEl.textContent = "12:00";
+  timerEl.classList.remove("done");
+  document.getElementById("clock").classList.remove("ended");
+  document.querySelector(".clock-label").textContent = "Time left";
+  startBtn.disabled = false;
+}
+
+function advance() {
+  if (finished) return;
+  if (current < questions.length - 1) {
+    current += 1;
+    showCurrent();
+    window.scrollTo(0, 0);
+    return;
+  }
+  endTest();
+}
+
+function endTest() {
+  if (finished) return;
+  finished = true;
+  if (tick) clearInterval(tick);
+  tick = null;
+  startBtn.disabled = true;
+  if (remaining <= 0) {
+    remaining = 0;
+    timerEl.textContent = "0:00";
+    timerEl.classList.add("done");
+  }
+  document.getElementById("clock").classList.add("ended");
+  document.querySelector(".clock-label").textContent = "Ended";
+  questions.forEach(q => {
+    q.revealed = true;
+    seen.add(q.prompt);
+  });
+  saveSeen(seen);
+  showReview();
+  updateScore();
+  showResults();
+}
+
+function resultItem(q, i) {
+  const item = document.createElement("div");
+  item.className = "item";
+  const title = document.createElement("p");
+  const snippet = q.prompt.replace(/\s+/g, " ");
+  title.textContent = `${i + 1}. ${snippet.length > 160 ? snippet.slice(0, 160) + "…" : snippet}`;
+  const answer = document.createElement("p");
+  answer.className = "key";
+  answer.textContent = `Correct: ${letters[q.answer]}. ${q.shown[q.answer]}`;
+  item.append(title, answer);
+  return { item, answer };
+}
+
+function showResults() {
+  const wrong = document.getElementById("results-wrong");
+  const right = document.getElementById("results-right");
+  wrong.replaceChildren();
+  right.replaceChildren();
+  let correctCount = 0;
+  questions.forEach((q, i) => {
+    const { item, answer } = resultItem(q, i);
+    if (q.picked === q.answer) {
+      correctCount += 1;
+      right.appendChild(item);
+      return;
+    }
+    const yours = document.createElement("p");
+    yours.className = "you";
+    yours.textContent = q.picked === null
+      ? "You: no answer"
+      : `You: ${letters[q.picked]}. ${q.shown[q.picked]}`;
+    answer.before(yours);
+    wrong.appendChild(item);
+  });
+  const blank = (parent) => {
+    if (parent.children.length) return;
+    const item = document.createElement("p");
+    item.textContent = "None.";
+    parent.appendChild(item);
+  };
+  blank(wrong);
+  blank(right);
+  document.getElementById("results-summary").textContent =
+    `${correctCount} / ${questions.length} correct. Time left ${format(remaining)}.`;
+  document.getElementById("results").showModal();
+}
+
+function newSitting() {
+  stopTimer();
+  finished = false;
+  current = 0;
+  list.replaceChildren();
+  nav.hidden = true;
+  intro.hidden = false;
+  progress.textContent = "";
+  score.textContent = "";
+  document.getElementById("results").close();
+  writeLede();
+  if (cursor >= queue.length) {
+    questions = [];
+    startBtn.disabled = true;
+    resetBtn.disabled = true;
+    againBtn.hidden = false;
+    resetBtn.title = "";
+    window.scrollTo(0, 0);
+    return;
+  }
+  questions = takeNext();
+  const exhausted = cursor >= queue.length;
+  startBtn.disabled = false;
+  resetBtn.disabled = exhausted;
+  againBtn.hidden = true;
+  resetBtn.title = exhausted ? "Every fresh question has been used." : "";
+  window.scrollTo(0, 0);
+}
+
+startBtn.addEventListener("click", () => {
+  if (tick || finished || !questions.length) return;
+  startBtn.disabled = true;
+  current = 0;
+  showCurrent();
+  tick = setInterval(() => {
+    remaining -= 1;
+    timerEl.textContent = format(Math.max(remaining, 0));
+    if (remaining <= 0) endTest();
+  }, 1000);
+});
+
+nextBtn.addEventListener("click", advance);
+resetBtn.addEventListener("click", newSitting);
+againBtn.addEventListener("click", () => {
+  seen = new Set();
+  saveSeen(seen);
+  queue = shuffle(BANK);
+  cursor = 0;
+  newSitting();
+});
+newSitting();
+</script>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cognitive practice</title>
+<style>
+  :root {
+    --ink: #1c2430;
+    --muted: #5c6778;
+    --line: #d9dee7;
+    --bg: #f3f5f8;
+    --card: #fff;
+    --accent: #1a4f8b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.45;
+  }
+  header {
+    background: #fff;
+    border-bottom: 1px solid var(--line);
+    padding: 22px 20px 18px;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  h1 { font-size: 1.25rem; margin: 0 0 4px; font-weight: 650; }
+  .lede { margin: 0; color: var(--muted); font-size: 0.92rem; }
+  main { padding: 18px 20px 48px; }
+  article {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 16px 16px;
+    margin: 0 0 12px;
+  }
+  .tag {
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 4px;
+  }
+  p { margin: 0 0 12px; }
+  a.action {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 8px;
+    padding: 8px 12px;
+    text-decoration: none;
+    font-weight: 650;
+  }
+  a.action.secondary {
+    background: #fff;
+    color: var(--ink);
+    border: 1px solid var(--line);
+  }
+  footer {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 8px 20px 28px;
+    color: #a3acb8;
+    font-size: 0.8rem;
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>Cognitive practice</h1>
+    <p class="lede">50 questions, 12 minutes, no calculator. One question at a time. Change your choice before Next. You cannot go back. At 0:00 the section ends.</p>
+  </div>
+</header>
+<main>
+  <div class="wrap">
+    <article>
+      <p class="tag">From the bank</p>
+      <p>50 questions from the bank of 1,000, easier ones first. A finished sitting stays out of the next run in this browser.</p>
+      <a class="action" href="cognitive-practice.html">Start from the bank</a>
+    </article>
+    <article>
+      <p class="tag">Generated</p>
+      <p>A fresh 50 on each run, with items from the same bank mixed in. A finished question is not repeated.</p>
+      <a class="action secondary" href="cognitive-generated.html">Start a generated set</a>
+    </article>
+  </div>
+</main>
+<footer>Prepared by Hasan Hüse.</footer>
+</body>
+</html>

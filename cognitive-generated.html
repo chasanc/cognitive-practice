@@ -1,0 +1,1496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cognitive practice — generated</title>
+<style>
+  :root {
+    --ink: #1c2430;
+    --muted: #5c6778;
+    --line: #d9dee7;
+    --bg: #f3f5f8;
+    --card: #fff;
+    --ok: #137333;
+    --ok-bg: #e6f4ea;
+    --bad: #b3261e;
+    --bad-bg: #fce8e6;
+    --accent: #1a4f8b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding-top: 44px;
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.45;
+  }
+  #clock {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 4;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    height: 44px;
+    padding: 0 20px;
+    background: #fff;
+    border-bottom: 1px solid var(--line);
+  }
+  #progress { font-weight: 650; }
+  .clock-side { display: flex; align-items: baseline; gap: 8px; }
+  .clock-label {
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-weight: 650;
+  }
+  header {
+    background: #fff;
+    border-bottom: 1px solid var(--line);
+    padding: 14px 20px 12px;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  h1 { font-size: 1.25rem; margin: 0 0 4px; font-weight: 650; }
+  .lede { margin: 0; color: var(--muted); font-size: 0.92rem; }
+  .bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    align-items: center;
+    margin-top: 10px;
+  }
+  button.action, button.choice {
+    font: inherit;
+    cursor: pointer;
+  }
+  button.action {
+    background: var(--accent);
+    color: #fff;
+    border: 0;
+    border-radius: 8px;
+    padding: 8px 12px;
+  }
+  button.action.secondary { background: #fff; color: var(--ink); border: 1px solid var(--line); }
+  #timer {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    font-size: 1.35rem;
+    min-width: 4.2ch;
+  }
+  #timer.done { color: var(--bad); }
+  #score { color: var(--muted); }
+  main { padding: 18px 20px 48px; }
+  .reveal-row { margin-top: 8px; }
+  #next { width: 100%; }
+  button.action:disabled { opacity: 0.65; cursor: default; }
+  article {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 16px 12px;
+    margin: 0 0 12px;
+  }
+  .tag {
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 4px;
+  }
+  .prompt { margin: 0 0 10px; font-size: 1.05rem; white-space: pre-wrap; }
+  img.figure { display: block; max-width: 100%; height: auto; margin: 0 0 10px; background: #fff; border: 1px solid var(--line); border-radius: 8px; }
+  .choices { display: flex; flex-direction: column; gap: 8px; }
+  button.choice {
+    text-align: left;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  button.choice:hover:not(:disabled) { border-color: var(--accent); }
+  button.choice.selected { border-color: var(--accent); background: #e8f0fa; }
+  button.choice:disabled { cursor: default; }
+  button.choice.correct { background: var(--ok-bg); border-color: var(--ok); color: var(--ok); }
+  button.choice.wrong { background: var(--bad-bg); border-color: var(--bad); color: var(--bad); }
+  .why { margin: 10px 0 0; font-size: 0.92rem; }
+  .why.ok { color: var(--ok); }
+  .why.bad { color: var(--bad); }
+  .mark { font-weight: 700; }
+  #results {
+    width: min(640px, calc(100% - 32px));
+    max-height: min(80vh, 720px);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px 18px 14px;
+    color: var(--ink);
+  }
+  #results::backdrop { background: rgba(28, 36, 48, 0.45); }
+  #results h2 { margin: 0; font-size: 1.15rem; }
+  #results h3 { margin: 14px 0 6px; font-size: 0.95rem; }
+  #results .summary { margin: 6px 0 0; color: var(--muted); }
+  #results .sheet { overflow: auto; max-height: calc(80vh - 140px); margin-top: 4px; }
+  #results .item { margin: 0 0 12px; }
+  #results .item p { margin: 0; }
+  #results .you { color: var(--bad); }
+  #results .key { color: var(--ok); }
+  #results .close { margin-top: 12px; }
+</style>
+</head>
+<body>
+<div id="clock">
+  <span id="progress"></span>
+  <span class="clock-side">
+    <span class="clock-label">Time left</span>
+    <span id="timer" aria-live="polite">12:00</span>
+  </span>
+</div>
+<header id="intro">
+  <div class="wrap">
+    <h1>Cognitive practice — generated</h1>
+    <p class="lede">50 new questions each run, 12 minutes, no calculator. Arithmetic, rates, dates, and series, with word and sentence items mixed in, easier ones first. A finished question is not repeated. Change your choice before Next. You cannot go back. At 0:00 the section ends.</p>
+    <div class="bar">
+      <button class="action" id="start" type="button">Start 12:00</button>
+      <button class="action secondary" id="reset" type="button">Reset</button>
+      <span id="score"></span>
+    </div>
+  </div>
+</header>
+<main>
+  <div class="wrap" id="list"></div>
+  <div class="wrap reveal-row" id="nav" hidden>
+    <button class="action" id="next" type="button">Next</button>
+  </div>
+</main>
+<dialog id="results">
+  <h2>Results</h2>
+  <p class="summary" id="results-summary"></p>
+  <div class="sheet">
+    <h3>Wrong</h3>
+    <div id="results-wrong"></div>
+    <h3>Correct</h3>
+    <div id="results-right"></div>
+  </div>
+  <form method="dialog">
+    <button class="action close" type="submit">Close</button>
+  </form>
+</dialog>
+<script src="exam/extra-1000.js"></script>
+<script>
+function randInt(a, b) {
+  return a + Math.floor(Math.random() * (b - a + 1));
+}
+
+function pick(items) {
+  return items[randInt(0, items.length - 1)];
+}
+
+function shuffle(items) {
+  const copy = items.slice();
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+function gcd(a, b) {
+  let x = Math.abs(a);
+  let y = Math.abs(b);
+  while (y) {
+    const t = y;
+    y = x % y;
+    x = t;
+  }
+  return x;
+}
+
+function lcm(a, b) {
+  return a / gcd(a, b) * b;
+}
+
+function cap(text) {
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+function ordinal(n) {
+  const v = n % 100;
+  if (v >= 11 && v <= 13) return `${n}th`;
+  switch (n % 10) {
+    case 1: return `${n}st`;
+    case 2: return `${n}nd`;
+    case 3: return `${n}rd`;
+    default: return `${n}th`;
+  }
+}
+
+function fmtCents(cents) {
+  const neg = cents < 0;
+  const v = Math.abs(Math.round(cents));
+  const dollars = Math.floor(v / 100);
+  const rem = v % 100;
+  const body = rem === 0
+    ? `$${dollars.toLocaleString("en-US")}`
+    : `$${dollars.toLocaleString("en-US")}.${String(rem).padStart(2, "0")}`;
+  return neg ? `-${body}` : body;
+}
+
+function fmtClock(mins) {
+  const h24 = Math.floor(mins / 60) % 24;
+  const m = ((mins % 60) + 60) % 60;
+  const ap = h24 >= 12 ? "p.m." : "a.m.";
+  let h = h24 % 12;
+  if (h === 0) h = 12;
+  return `${h}:${String(m).padStart(2, "0")} ${ap}`;
+}
+
+function durationLabel(hours) {
+  if (hours === 0.5) return "30 minutes";
+  const whole = Math.floor(hours);
+  if (hours - whole === 0.5) return `${whole} 1/2 hours`;
+  return whole === 1 ? "1 hour" : `${whole} hours`;
+}
+
+function addDays(name, n) {
+  const i = DAYS.indexOf(name);
+  return DAYS[((i + n) % 7 + 7) % 7];
+}
+
+function reducePair(n, d) {
+  const g = gcd(n, d);
+  return `${n / g}/${d / g}`;
+}
+
+function squareRoot(t) {
+  const r = Math.round(Math.sqrt(t));
+  return r * r === t ? r : null;
+}
+
+function soleNext(terms) {
+  const found = [];
+  const diffs = [];
+  for (let i = 1; i < terms.length; i++) diffs.push(terms[i] - terms[i - 1]);
+  if (diffs.length && diffs.every(d => d === diffs[0]) && diffs[0] !== 0) {
+    found.push(terms[terms.length - 1] + diffs[0]);
+  }
+  const roots = terms.map(squareRoot);
+  if (roots.every(r => r !== null) && roots.every((r, i) => r === roots[0] + i)) {
+    found.push((roots[roots.length - 1] + 1) ** 2);
+  }
+  const arithmetic = diffs.length > 0 && diffs.every(d => d === diffs[0]);
+  const ks = [];
+  for (let i = 1; i < terms.length; i++) ks.push(terms[i] - 2 * terms[i - 1]);
+  if (!arithmetic && ks.length && ks.every(k => k === ks[0])) {
+    found.push(2 * terms[terms.length - 1] + ks[0]);
+  }
+  const d2 = [];
+  for (let i = 1; i < diffs.length; i++) d2.push(diffs[i] - diffs[i - 1]);
+  if (d2.length && d2.every(d => d === d2[0]) && d2[0] !== 0) {
+    found.push(terms[terms.length - 1] + diffs[diffs.length - 1] + d2[0]);
+  }
+  const uniq = [...new Set(found)];
+  return uniq.length === 1 ? uniq[0] : null;
+}
+
+function makeQuestion(spec) {
+  const answer = String(spec.answer).trim();
+  const choices = [];
+  const seen = new Set();
+  for (const value of [spec.answer, ...spec.wrongs]) {
+    if (value === null || value === undefined) continue;
+    const text = String(value).trim();
+    if (!text || seen.has(text) || text.includes("NaN")) continue;
+    seen.add(text);
+    choices.push(text);
+  }
+  if (choices.length < 5) return null;
+  const five = shuffle(choices.slice(0, 5));
+  if (five.filter(choice => choice === answer).length !== 1) return null;
+  if (!spec.prompt || spec.prompt.includes("undefined") || spec.prompt.includes("NaN")) return null;
+  if (!spec.why || spec.why.length < 8) return null;
+  return {
+    rank: spec.rank,
+    tag: spec.tag,
+    prompt: spec.prompt,
+    choices: five,
+    answer,
+    why: spec.why
+  };
+}
+
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const GOODS = ["pens", "hats", "mugs", "notebooks", "apples", "stamps"];
+const WORDS = ["amber", "bridge", "cabin", "donkey", "eagle", "falcon", "garden", "harbor", "island", "jacket", "kettle", "lantern", "maple", "needle", "orange", "pencil", "quartz", "river", "silver", "timber", "umbrella", "valley", "walnut", "yellow", "anchor", "basket", "cloud", "desert", "engine", "forest", "gravel", "hammer", "insect", "jungle", "kernel", "ladder", "magnet", "north", "oxygen", "pebble"];
+const PAIRS = [["Nora", "Eli"], ["Maya", "Owen"], ["Lina", "Evan"], ["Sara", "Noah"], ["Rita", "Adam"], ["Vera", "Hugo"], ["Cora", "Ivan"], ["Leah", "Eric"]];
+const TIMES = { 2: "twice", 3: "three times", 4: "four times", 5: "five times" };
+const EXTREMES = [0.029, 0.089, 0.09, 0.19, 0.2, 0.209, 0.29, 0.3, 0.309, 0.39, 0.4, 0.45, 0.49, 0.5, 0.59, 0.6, 0.67, 0.7, 0.78, 0.8, 0.89, 0.9, 0.909, 0.99, 1.01, 1.1, 1.19, 1.2, 1.25];
+const MONTH_DAYS = { March: 31, April: 30, May: 31, June: 30, July: 31, August: 31 };
+const FRACTIONS = [
+  { d: 2, word: "one-half" },
+  { d: 3, word: "one-third" },
+  { d: 4, word: "one-fourth" },
+  { d: 5, word: "one-fifth" }
+];
+const TANK_PARTS = [
+  [3, 5, "three-fifths"],
+  [2, 3, "two-thirds"],
+  [3, 4, "three-fourths"],
+  [4, 5, "four-fifths"],
+  [2, 5, "two-fifths"],
+  [5, 6, "five-sixths"],
+  [1, 2, "one-half"]
+];
+const TANK_USES = [
+  [1, 2, "One-half"],
+  [1, 3, "One-third"],
+  [1, 4, "One-fourth"],
+  [1, 5, "One-fifth"]
+];
+
+const WORK_PAIRS = [];
+for (let a = 2; a <= 24; a++) {
+  for (let b = 2; b <= 36; b++) {
+    if (a === b) continue;
+    if ((a * b) % (a + b) !== 0) continue;
+    const hours = (a * b) / (a + b);
+    if (hours < 2 || hours > 12 || hours === a || hours === b) continue;
+    WORK_PAIRS.push([a, b, hours]);
+  }
+}
+
+const HARMONIC = [];
+for (let s1 = 6; s1 <= 48; s1++) {
+  for (let s2 = s1 + 1; s2 <= 72; s2++) {
+    if ((2 * s1 * s2) % (s1 + s2) !== 0) continue;
+    const avg = (2 * s1 * s2) / (s1 + s2);
+    const dist = lcm(s1, s2);
+    if (avg < 4 || avg > 80 || dist > 240) continue;
+    HARMONIC.push([s1, s2, avg]);
+  }
+}
+
+const AGE_FUTURE = [];
+for (const k of [3, 4, 5]) {
+  for (const m of [2, 3]) {
+    if (k <= m) continue;
+    for (let n = 4; n <= 24; n++) {
+      if ((n * (m - 1)) % (k - m) !== 0) continue;
+      const d = n * (m - 1) / (k - m);
+      const mother = k * d;
+      if (d < 4 || d > 36 || mother < 16 || mother > 72) continue;
+      if (k * d + n !== m * (d + n)) continue;
+      AGE_FUTURE.push({ k, m, n, d, mother });
+    }
+  }
+}
+
+function around(n, max) {
+  const out = [];
+  for (const d of [1, -1, 2, -2, 3, -3, 4, -4, 5, -5]) {
+    const i = n + d;
+    if (i >= 1 && i <= max) out.push(i);
+    if (out.length === 4) break;
+  }
+  return out;
+}
+
+function genMonth(rank) {
+  const n = randInt(1, 12);
+  const answer = MONTHS[n - 1];
+  return makeQuestion({
+    rank,
+    tag: "Calendar",
+    prompt: `The ${ordinal(n)} month of the year is:`,
+    answer,
+    wrongs: around(n, 12).map(i => MONTHS[i - 1]),
+    why: `Month ${n} is ${answer}.`
+  });
+}
+
+function genLetter(rank) {
+  const n = randInt(1, 26);
+  const answer = LETTERS[n - 1];
+  return makeQuestion({
+    rank,
+    tag: "Calendar",
+    prompt: `The ${ordinal(n)} letter of the English alphabet is:`,
+    answer,
+    wrongs: around(n, 26).map(i => LETTERS[i - 1]),
+    why: `Letter ${n} is ${answer}.`
+  });
+}
+
+function genDivide(rank) {
+  const d = randInt(2, 12);
+  const q = randInt(2, 12);
+  const a = d * q;
+  return makeQuestion({
+    rank,
+    tag: "Arithmetic",
+    prompt: `What is ${a} divided by ${d}?`,
+    answer: String(q),
+    wrongs: [q + 1, q - 1, d, a, q + d, q * 2, a - d].filter(n => n > 0 && n !== q).map(String),
+    why: `${a} ÷ ${d} = ${q}.`
+  });
+}
+
+function genTimes(rank) {
+  const a = randInt(3, 12);
+  const b = randInt(3, 12);
+  const prod = a * b;
+  return makeQuestion({
+    rank,
+    tag: "Arithmetic",
+    prompt: `What is ${a} times ${b}?`,
+    answer: String(prod),
+    wrongs: [(a + 1) * b, Math.max(1, (a - 1) * b), a * (b + 1), a * Math.max(1, b - 1), a + b, prod + a].filter(n => n !== prod).map(String),
+    why: `${a} × ${b} = ${prod}.`
+  });
+}
+
+function genFractionOf(rank) {
+  const f = pick(FRACTIONS);
+  const k = randInt(3, 18);
+  const base = f.d * k;
+  return makeQuestion({
+    rank,
+    tag: "Arithmetic",
+    prompt: `What is ${f.word} of ${base}?`,
+    answer: String(k),
+    wrongs: [base, f.d, k + 1, k - 1, k * 2, base - k].filter(n => n > 0 && n !== k).map(String),
+    why: `${f.word} of ${base} = ${base} / ${f.d} = ${k}.`
+  });
+}
+
+function genExtreme(rank) {
+  const nums = shuffle(EXTREMES).slice(0, 5);
+  const small = Math.random() < 0.5;
+  const value = small ? Math.min(...nums) : Math.max(...nums);
+  const labels = nums.map(String);
+  const answer = String(value);
+  if (new Set(labels).size !== 5 || !labels.includes(answer)) return null;
+  return makeQuestion({
+    rank,
+    tag: "Arithmetic",
+    prompt: `Which is the ${small ? "smallest" : "largest"}?\n${labels.join(", ")}`,
+    answer,
+    wrongs: labels.filter(label => label !== answer),
+    why: `The ${small ? "smallest" : "largest"} value is ${answer}.`
+  });
+}
+
+function genUnit(rank) {
+  const item = pick(GOODS);
+  const cents = pick([25, 35, 50, 75, 125, 150, 200]);
+  const count = randInt(2, 8);
+  const total = cents * count;
+  const price = fmtCents(cents);
+  const answer = fmtCents(total);
+  return makeQuestion({
+    rank,
+    tag: "Arithmetic",
+    prompt: `${cap(item)} cost ${price} each. How much do ${count} ${item} cost?`,
+    answer,
+    wrongs: [total + cents, total - cents, cents, total + 100, count * (cents + 25)].filter(n => n > 0).map(fmtCents),
+    why: `${count} × ${price} = ${answer}.`
+  });
+}
+
+function genPercent(rank) {
+  const p = pick([10, 20, 25, 50]);
+  const base = p === 25 ? pick([20, 40, 60, 80, 120]) : pick([20, 40, 50, 60, 80, 90, 100, 150]);
+  const answer = base * p / 100;
+  if (!Number.isInteger(answer)) return null;
+  return makeQuestion({
+    rank,
+    tag: "Arithmetic",
+    prompt: `What is ${p}% of ${base}?`,
+    answer: String(answer),
+    wrongs: [base, p, answer + p, answer - 1, base - answer, answer * 2].filter(n => n > 0 && n !== answer).map(String),
+    why: `${p}% of ${base} = ${base} × ${p}/100 = ${answer}.`
+  });
+}
+
+function genChange(rank) {
+  const item = pick(GOODS);
+  const cents = pick([25, 50, 75, 125, 150, 200, 250]);
+  const count = randInt(2, 6);
+  const cost = cents * count;
+  const bills = [1000, 2000, 5000].filter(bill => bill > cost + 50);
+  if (!bills.length) return null;
+  const bill = pick(bills);
+  const change = bill - cost;
+  const price = fmtCents(cents);
+  return makeQuestion({
+    rank,
+    tag: "Arithmetic",
+    prompt: `${cap(item)} cost ${price} each. How much change is left from ${fmtCents(bill)} after buying ${count} ${item}?`,
+    answer: fmtCents(change),
+    wrongs: [cost, change + cents, change - cents, bill, bill - cents].filter(n => n > 0 && n !== change).map(fmtCents),
+    why: `${count} × ${price} = ${fmtCents(cost)}. ${fmtCents(bill)} − ${fmtCents(cost)} = ${fmtCents(change)}.`
+  });
+}
+
+function genMiles(rank) {
+  const speed = pick([30, 36, 40, 45, 48, 50, 60, 75]);
+  const minutes = pick([12, 15, 20, 30, 40, 45]);
+  if ((speed * minutes) % 60 !== 0) return null;
+  const miles = speed * minutes / 60;
+  if (!Number.isInteger(miles) || miles <= 0) return null;
+  return makeQuestion({
+    rank,
+    tag: "Rate",
+    prompt: `A train travels at ${speed} miles per hour. How many miles does it travel in ${minutes} minutes?`,
+    answer: String(miles),
+    wrongs: [speed, minutes, miles * 2, miles + 5, Math.max(1, miles - 5), speed + minutes].filter(n => n !== miles).map(String),
+    why: `${minutes} minutes is ${minutes}/60 of an hour. ${speed} × ${minutes}/60 = ${miles}.`
+  });
+}
+
+function genAverage(rank) {
+  const a = randInt(4, 30);
+  const b = randInt(4, 40);
+  const c = randInt(4, 50);
+  const sum = a + b + c;
+  if (sum % 3 !== 0) return null;
+  const avg = sum / 3;
+  return makeQuestion({
+    rank,
+    tag: "Arithmetic",
+    prompt: `The average of ${a}, ${b}, and ${c} is:`,
+    answer: String(avg),
+    wrongs: [a, b, c, sum, avg + 1, Math.max(1, avg - 1)].filter(n => n !== avg).map(String),
+    why: `(${a} + ${b} + ${c}) / 3 = ${sum} / 3 = ${avg}.`
+  });
+}
+
+function genRope(rank) {
+  const per = pick([75, 125, 150, 200, 250, 300]);
+  const feet = randInt(4, 18);
+  const budget = per * feet;
+  return makeQuestion({
+    rank,
+    tag: "Arithmetic",
+    prompt: `Rope costs ${fmtCents(per)} a foot. How many feet can be bought with ${fmtCents(budget)}?`,
+    answer: String(feet),
+    wrongs: [feet + 1, feet - 1, feet + 2, feet + 3, Math.max(1, feet - 2), feet * 2].filter(n => n !== feet).map(String),
+    why: `${fmtCents(budget)} ÷ ${fmtCents(per)} = ${feet} feet.`
+  });
+}
+
+function genMeeting(rank) {
+  const start = randInt(13 * 60, 16 * 60);
+  const startRounded = start - (start % 5);
+  const dur = pick([15, 20, 25, 30, 35, 40, 45, 50, 75, 90]);
+  const end = startRounded + dur;
+  if (end >= 18 * 60) return null;
+  const answer = fmtClock(end);
+  const wrongs = [-45, -30, -15, 15, 30, 45, 60].map(delta => end + delta).filter(t => t > 0 && t < 24 * 60 && t !== end).map(fmtClock);
+  return makeQuestion({
+    rank,
+    tag: "Calendar",
+    prompt: `A meeting begins at ${fmtClock(startRounded)} and lasts ${dur} minutes. When does it end?`,
+    answer,
+    wrongs,
+    why: `${dur} minutes after ${fmtClock(startRounded)} is ${answer}.`
+  });
+}
+
+function genWeekday(rank) {
+  const month = pick(Object.keys(MONTH_DAYS));
+  const d1 = randInt(1, 10);
+  const gap = pick([1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13, 15, 16, 17, 18]);
+  const d2 = d1 + gap;
+  if (d2 > MONTH_DAYS[month]) return null;
+  const start = pick(DAYS);
+  const answer = addDays(start, gap);
+  return makeQuestion({
+    rank,
+    tag: "Calendar",
+    prompt: `${month} ${d1} is a ${start}. What day of the week is ${month} ${d2}?`,
+    answer,
+    wrongs: shuffle(DAYS.filter(day => day !== answer)).slice(0, 4),
+    why: `${month} ${d2} is ${gap} days after ${month} ${d1}. ${gap} mod 7 is ${gap % 7}, and that many days after ${start} is ${answer}.`
+  });
+}
+
+function seriesQuestion(rank, terms, next, why) {
+  if (soleNext(terms) !== next) return null;
+  if (terms.some(term => !Number.isInteger(term) || term <= 0) || !Number.isInteger(next) || next <= 0 || next > 800) return null;
+  return makeQuestion({
+    rank,
+    tag: "Series",
+    prompt: `What number comes next?\n${terms.join(", ")}, ___`,
+    answer: String(next),
+    wrongs: [next + 1, next - 1, next + 2, terms[terms.length - 1], next + (terms[1] - terms[0])].filter(n => n > 0 && n !== next).map(String),
+    why
+  });
+}
+
+function genSeriesAdd(rank) {
+  const start = randInt(1, 18);
+  const step = randInt(2, 9);
+  const terms = [0, 1, 2, 3, 4].map(i => start + i * step);
+  const next = start + 5 * step;
+  return seriesQuestion(rank, terms, next, `Each term increases by ${step}. The next term is ${next}.`);
+}
+
+function genSquares(rank) {
+  const start = randInt(1, 12);
+  const terms = [0, 1, 2, 3, 4].map(i => (start + i) ** 2);
+  const next = (start + 5) ** 2;
+  return seriesQuestion(rank, terms, next, `These are consecutive squares. The next square is ${next}.`);
+}
+
+function genProfit(rank) {
+  const item = pick(["hats", "lamps", "shirts", "clocks"]);
+  const n = randInt(4, 12);
+  const costEach = randInt(3, 15);
+  const sell = costEach + randInt(2, 9);
+  const total = n * costEach;
+  const profit = n * (sell - costEach);
+  return makeQuestion({
+    rank,
+    tag: "Arithmetic",
+    prompt: `A merchant buys ${n} ${item} for ${fmtCents(total * 100)} in total and sells each for ${fmtCents(sell * 100)}. What is the total profit?`,
+    answer: fmtCents(profit * 100),
+    wrongs: [n * sell, total, profit + sell, sell - costEach, profit + costEach, profit - costEach].filter(value => value > 0 && value !== profit).map(value => fmtCents(value * 100)),
+    why: `Each sale gains ${fmtCents((sell - costEach) * 100)}. ${n} × ${fmtCents((sell - costEach) * 100)} = ${fmtCents(profit * 100)}.`
+  });
+}
+
+function genMarkup(rank) {
+  const cost = pick([20, 24, 40, 48, 60, 80, 100]);
+  const p = pick([10, 20, 25, 50]);
+  const sell = cost * (100 + p) / 100;
+  if (!Number.isInteger(sell)) return null;
+  const markup = sell - cost;
+  return makeQuestion({
+    rank,
+    tag: "Arithmetic",
+    prompt: `An item costs ${fmtCents(cost * 100)}. The shop sells it for ${p}% more than its cost. What is the selling price?`,
+    answer: fmtCents(sell * 100),
+    wrongs: [cost, markup, cost + p, sell + markup, sell - markup].filter(value => value > 0 && value !== sell).map(value => fmtCents(value * 100)),
+    why: `${p}% of ${fmtCents(cost * 100)} is ${fmtCents(markup * 100)}. The selling price is ${fmtCents(sell * 100)}.`
+  });
+}
+
+function genAlpha(rank) {
+  const words = shuffle(WORDS).slice(0, 5);
+  const sorted = words.slice().sort();
+  const third = sorted[2];
+  return makeQuestion({
+    rank,
+    tag: "Order",
+    prompt: `If the following words were arranged in alphabetical order, which would come third?\n${words.join(", ")}`,
+    answer: third,
+    wrongs: words.filter(word => word !== third),
+    why: `In alphabetical order: ${sorted.join(", ")}. The third word is ${third}.`
+  });
+}
+
+function freshCode(usedCodes) {
+  let code = "";
+  do {
+    code = String(randInt(10000, 99999));
+  } while (usedCodes.has(code));
+  usedCodes.add(code);
+  return code;
+}
+
+function mutateCode(code) {
+  const digits = code.split("");
+  const i = randInt(0, digits.length - 1);
+  let next = digits[i];
+  while (next === digits[i]) next = String(randInt(0, 9));
+  digits[i] = next;
+  return digits.join("");
+}
+
+function genDuplicates(rank) {
+  const matches = randInt(1, 4);
+  const usedCodes = new Set();
+  const lines = [];
+  for (let i = 0; i < 5; i++) {
+    const left = freshCode(usedCodes);
+    let right = left;
+    if (i >= matches) {
+      right = mutateCode(left);
+      if (right === left) return null;
+    }
+    lines.push([left, right]);
+  }
+  const shuffled = shuffle(lines);
+  const count = shuffled.filter(pair => pair[0] === pair[1]).length;
+  if (count !== matches) return null;
+  return makeQuestion({
+    rank,
+    tag: "Checking",
+    prompt: `How many of the following pairs are exact duplicates?\n${shuffled.map(pair => `${pair[0]}  ${pair[1]}`).join("\n")}`,
+    answer: String(count),
+    wrongs: ["0", "1", "2", "3", "4", "5"].filter(value => value !== String(count)),
+    why: `${count} of the five pairs match exactly.`
+  });
+}
+
+function genSpeed(rank) {
+  const hours = pick([0.5, 1.5, 2, 2.5, 3]);
+  const speed = pick([24, 30, 32, 36, 40, 45, 48, 50, 60]);
+  const miles = speed * hours;
+  if (!Number.isInteger(miles) || miles <= 0) return null;
+  return makeQuestion({
+    rank,
+    tag: "Rate",
+    prompt: `A car travels ${miles} miles in ${durationLabel(hours)} at a constant speed. What is its speed in miles per hour?`,
+    answer: String(speed),
+    wrongs: [miles, Math.max(1, speed - 8), speed + 10, Math.round(miles / 2), Math.round(speed * hours), Math.max(1, speed - 4)].filter(n => n !== speed).map(String),
+    why: `${miles} miles in ${durationLabel(hours)} is ${speed} miles per hour.`
+  });
+}
+
+function genAppointments(rank) {
+  const start = pick([8, 9, 10]) * 60 + pick([0, 10, 15, 20, 30]);
+  const step = pick([10, 15, 20, 30]);
+  const k = pick([3, 4, 5, 6]);
+  const end = start + (k - 1) * step;
+  if (end >= 12 * 60) return null;
+  const answer = fmtClock(end);
+  const wrongs = [1, 2, 3, 4, 5, 6].map(n => start + n * step).filter(t => t !== end && t < 13 * 60).map(fmtClock);
+  return makeQuestion({
+    rank,
+    tag: "Calendar",
+    prompt: `Appointments begin at ${fmtClock(start)} and continue every ${step} minutes. At what time does the ${ordinal(k)} appointment begin?`,
+    answer,
+    wrongs,
+    why: `The ${ordinal(k)} appointment is ${k - 1} intervals after the first. ${k - 1} × ${step} minutes after ${fmtClock(start)} is ${answer}.`
+  });
+}
+
+function genCombo(rank) {
+  const names = shuffle(["notebooks", "pens", "mugs", "apples"]);
+  const p1 = pick([150, 200, 250, 300, 400, 500]);
+  const p2 = pick([50, 75, 100, 125, 150]);
+  const n1 = randInt(2, 6);
+  const n2 = randInt(2, 8);
+  const total = n1 * p1 + n2 * p2;
+  return makeQuestion({
+    rank,
+    tag: "Arithmetic",
+    prompt: `What is the total cost of ${n1} ${names[0]} at ${fmtCents(p1)} each and ${n2} ${names[1]} at ${fmtCents(p2)} each?`,
+    answer: fmtCents(total),
+    wrongs: [n1 * p1, n2 * p2, total + p1, Math.max(1, total - p2), n1 * p2 + n2 * p1, p1 + p2].filter(n => n !== total).map(fmtCents),
+    why: `${n1} × ${fmtCents(p1)} + ${n2} × ${fmtCents(p2)} = ${fmtCents(total)}.`
+  });
+}
+
+function genFractionAdd(rank) {
+  const a = randInt(2, 8);
+  const b = randInt(a + 1, 12);
+  if (gcd(a, b) !== 1) return null;
+  const answer = reducePair(a + b, a * b);
+  const wrongs = [
+    reducePair(1, a + b),
+    reducePair(b - a, a * b),
+    reducePair(a + b, a + b),
+    `${a}/${b}`,
+    reducePair(a + b, a * b + 1),
+    reducePair(a, a + b)
+  ];
+  return makeQuestion({
+    rank,
+    tag: "Arithmetic",
+    prompt: `What is 1/${a} + 1/${b}?`,
+    answer,
+    wrongs,
+    why: `1/${a} + 1/${b} = ${b}/${a * b} + ${a}/${a * b} = ${answer}.`
+  });
+}
+
+function genSeriesDouble(rank) {
+  const k = pick([-2, -1, 0, 1, 2]);
+  const start = randInt(2, 12);
+  const terms = [start];
+  while (terms.length < 5) terms.push(terms[terms.length - 1] * 2 + k);
+  const next = terms[terms.length - 1] * 2 + k;
+  const rule = k === 0
+    ? "Each term is double the one before."
+    : `Each term is double the one before, then ${k > 0 ? "plus" : "minus"} ${Math.abs(k)}.`;
+  return seriesQuestion(rank, terms, next, `${rule} The next term is ${next}.`);
+}
+
+function genDaySimple(rank) {
+  const day = pick(DAYS);
+  const form = pick(["beforeYesterday", "yesterday", "today", "tomorrow"]);
+  let prompt;
+  let answer;
+  let why;
+  if (form === "beforeYesterday") {
+    const yesterday = addDays(day, 1);
+    const today = addDays(day, 2);
+    answer = addDays(day, 3);
+    prompt = `If the day before yesterday was ${day}, what day is tomorrow?`;
+    why = `The day before yesterday was ${day}, so yesterday was ${yesterday}, today is ${today}, and tomorrow is ${answer}.`;
+  } else if (form === "yesterday") {
+    answer = addDays(day, 3);
+    prompt = `If yesterday was ${day}, what day is the day after tomorrow?`;
+    why = `Yesterday was ${day}, so today is ${addDays(day, 1)}, tomorrow is ${addDays(day, 2)}, and the day after tomorrow is ${answer}.`;
+  } else if (form === "today") {
+    answer = addDays(day, 2);
+    prompt = `If today is ${day}, what day is the day after tomorrow?`;
+    why = `Today is ${day}, so tomorrow is ${addDays(day, 1)}, and the day after tomorrow is ${answer}.`;
+  } else {
+    answer = addDays(day, -2);
+    prompt = `If tomorrow is ${day}, what day was yesterday?`;
+    why = `Tomorrow is ${day}, so today is ${addDays(day, -1)}, and yesterday was ${answer}.`;
+  }
+  return makeQuestion({
+    rank,
+    tag: "Calendar",
+    prompt,
+    answer,
+    wrongs: shuffle(DAYS.filter(name => name !== answer)).slice(0, 4),
+    why
+  });
+}
+
+function genAgeRatio(rank) {
+  const [name1, name2] = pick(PAIRS);
+  const r = pick([2, 3, 4]);
+  const younger = randInt(6, 16);
+  const older = younger * r;
+  const total = older + younger;
+  return makeQuestion({
+    rank,
+    tag: "Arithmetic",
+    prompt: `${name1} is ${TIMES[r]} as old as ${name2}. Their ages total ${total}. How old is ${name1}?`,
+    answer: String(older),
+    wrongs: [younger, total, older + r, Math.max(1, older - r), r, total + younger].filter(n => n !== older).map(String),
+    why: `${name1} has ${r} shares and ${name2} has 1, so there are ${r + 1} shares. ${total} / ${r + 1} × ${r} = ${older}.`
+  });
+}
+
+function genBox(rank) {
+  const l = randInt(2, 9);
+  const w = randInt(2, 9);
+  const h = randInt(2, 9);
+  const vol = l * w * h;
+  return makeQuestion({
+    rank,
+    tag: "Arithmetic",
+    prompt: `A box is ${l} inches long and ${w} inches wide. Its volume is ${vol} cubic inches. What is its height in inches?`,
+    answer: String(h),
+    wrongs: [l, w, l * w, h + 1, Math.max(1, h - 1), vol].filter(n => n !== h).map(String),
+    why: `${l} × ${w} × height = ${vol}, so height = ${vol} / ${l * w} = ${h}.`
+  });
+}
+
+function genWork(rank) {
+  if (!WORK_PAIRS.length) return null;
+  const [a, b, hours] = pick(WORK_PAIRS);
+  return makeQuestion({
+    rank,
+    tag: "Rate",
+    prompt: `Pipe A fills a tank in ${a} hours. Pipe B fills the same tank in ${b} hours. Working together, how many hours do they take to fill the empty tank?`,
+    answer: String(hours),
+    wrongs: [a, b, a + b, Math.abs(a - b), hours + 1, hours * 2].filter(n => n > 0 && n !== hours).map(String),
+    why: `1/${a} + 1/${b} = 1/${hours}, so together they take ${hours} hours.`
+  });
+}
+
+function genAgeSum(rank) {
+  const [olderName, youngerName] = pick(PAIRS);
+  const younger = randInt(8, 28);
+  const d = randInt(2, 12);
+  const y = randInt(3, 14);
+  const total = 2 * younger + d + 2 * y;
+  return makeQuestion({
+    rank,
+    tag: "Arithmetic",
+    prompt: `${olderName} is ${d} years older than ${youngerName}. In ${y} years, their ages will total ${total}. How old is ${youngerName} now?`,
+    answer: String(younger),
+    wrongs: [younger + d, younger + y, d, y, younger + d + y, total - younger].filter(n => n > 0 && n !== younger).map(String),
+    why: `Let ${youngerName} be x. In ${y} years the ages sum to 2x + ${d} + ${2 * y} = ${total}, so x = ${younger}.`
+  });
+}
+
+function genSeriesGrow(rank) {
+  const start = randInt(2, 12);
+  let d = randInt(2, 5);
+  const terms = [start];
+  while (terms.length < 5) {
+    terms.push(terms[terms.length - 1] + d);
+    d += 1;
+  }
+  const next = terms[terms.length - 1] + d;
+  const diffs = [];
+  for (let i = 1; i < terms.length; i++) diffs.push(terms[i] - terms[i - 1]);
+  return seriesQuestion(rank, terms, next, `The gaps are ${diffs.join(", ")} and grow by 1. The next gap is ${d}, so the next term is ${next}.`);
+}
+
+function countDigit(d, from, to) {
+  let n = 0;
+  const ch = String(d);
+  for (let i = from; i <= to; i++) {
+    for (const c of String(i)) if (c === ch) n++;
+  }
+  return n;
+}
+
+function countContaining(d, from, to) {
+  let n = 0;
+  const ch = String(d);
+  for (let i = from; i <= to; i++) if (String(i).includes(ch)) n++;
+  return n;
+}
+
+function genDigit(rank) {
+  const d = randInt(0, 9);
+  const n = pick([30, 40, 50, 60, 80, 100]);
+  const answer = countDigit(d, 1, n);
+  const containing = countContaining(d, 1, n);
+  if (answer < 2) return null;
+  return makeQuestion({
+    rank,
+    tag: "Arithmetic",
+    prompt: `How many times does the digit ${d} appear in the numbers from 1 to ${n}?`,
+    answer: String(answer),
+    wrongs: [answer + 1, answer - 1, answer + 2, answer + 10, Math.max(0, answer - 10), containing].filter(value => value !== answer && value >= 0).map(String),
+    why: `From 1 through ${n}, the digit ${d} is written ${answer} times. A repeated digit in one number counts each time.`
+  });
+}
+
+function genAgeFuture(rank) {
+  if (!AGE_FUTURE.length) return null;
+  const row = pick(AGE_FUTURE);
+  return makeQuestion({
+    rank,
+    tag: "Arithmetic",
+    prompt: `A mother is ${TIMES[row.k]} as old as her daughter. In ${row.n} years, the mother will be ${TIMES[row.m]} as old as her daughter. How old is the mother now?`,
+    answer: String(row.mother),
+    wrongs: [row.d, row.n, row.mother + row.n, row.d + row.n, row.k * row.n, Math.max(1, row.mother - row.n)].filter(value => value !== row.mother).map(String),
+    why: `Let the daughter be x. Then ${row.k}x + ${row.n} = ${row.m}(x + ${row.n}), so x = ${row.d}. The mother is ${row.k} × ${row.d} = ${row.mother}.`
+  });
+}
+
+function genUpDown(rank) {
+  const options = [
+    { p: 10, originals: [100, 200, 300, 400, 500, 600, 800] },
+    { p: 20, originals: [50, 75, 100, 125, 150, 175, 200, 225, 250, 300] },
+    { p: 25, originals: [32, 48, 64, 80, 96, 112, 128, 160, 192, 240] }
+  ];
+  const opt = pick(options);
+  const original = pick(opt.originals);
+  const num = 10000 - opt.p * opt.p;
+  if ((original * num) % 10000 !== 0) return null;
+  const final = original * num / 10000;
+  const mid = original * (100 + opt.p) / 100;
+  if (!Number.isInteger(final) || !Number.isInteger(mid)) return null;
+  return makeQuestion({
+    rank,
+    tag: "Arithmetic",
+    prompt: `A number is increased by ${opt.p}%, then that result is decreased by ${opt.p}%. The final value is ${final}. What was the original number?`,
+    answer: String(original),
+    wrongs: [final, mid, original + opt.p, Math.max(1, original - opt.p), final + opt.p, original + final].filter(value => value !== original).map(String),
+    why: `The two changes multiply the original by ${num}/10000. ${final} × 10000 / ${num} = ${original}.`
+  });
+}
+
+function genTank(rank) {
+  const full = pick(TANK_PARTS);
+  const use = pick(TANK_USES);
+  const num = full[0] * (use[1] - use[0]);
+  const den = full[1] * use[1];
+  if (num <= 0 || den <= 0) return null;
+  const answer = reducePair(num, den);
+  if (answer === reducePair(full[0], full[1]) || answer === reducePair(use[0], use[1])) return null;
+  return makeQuestion({
+    rank,
+    tag: "Arithmetic",
+    prompt: `A tank is ${full[2]} full. ${use[2]} of the water currently in it is used. What fraction of the whole tank remains filled?`,
+    answer,
+    wrongs: [
+      reducePair(full[0], full[1]),
+      reducePair(use[0], use[1]),
+      reducePair(num + 1, den),
+      reducePair(Math.max(1, num - 1), den),
+      `${num}/${den}`
+    ],
+    why: `${full[0]}/${full[1]} of the tank remains after removing ${use[0]}/${use[1]} of what is in it: ${full[0]}/${full[1]} × ${use[1] - use[0]}/${use[1]} = ${answer}.`
+  });
+}
+
+function genTwoLeg(rank) {
+  if (!HARMONIC.length) return null;
+  const [s1, s2, avg] = pick(HARMONIC);
+  const dist = lcm(s1, s2);
+  const t1 = dist / s1;
+  const t2 = dist / s2;
+  if (!Number.isInteger(t1) || !Number.isInteger(t2) || (2 * dist) / (t1 + t2) !== avg) return null;
+  return makeQuestion({
+    rank,
+    tag: "Rate",
+    prompt: `A trip of ${dist} miles at ${s1} miles per hour, then the same ${dist} miles back at ${s2} miles per hour, has what average speed in miles per hour for the whole trip?`,
+    answer: String(avg),
+    wrongs: [s1, s2, Math.round((s1 + s2) / 2), avg + 2, t1 + t2, dist].filter(n => n !== avg).map(String),
+    why: `Going takes ${t1} hours and returning takes ${t2} hours. ${2 * dist} miles ÷ ${t1 + t2} hours = ${avg} miles per hour.`
+  });
+}
+
+function genDayHard(rank) {
+  const n = pick([2, 3, 4, 5]);
+  const day = pick(DAYS);
+  const mid = addDays(day, n);
+  const answer = addDays(mid, n);
+  return makeQuestion({
+    rank,
+    tag: "Calendar",
+    prompt: `${n} days after ${day} is ${n} days before which day?`,
+    answer,
+    wrongs: shuffle(DAYS.filter(name => name !== answer)).slice(0, 4),
+    why: `${n} days after ${day} is ${mid}. ${mid} is ${n} days before ${answer}.`
+  });
+}
+
+function genInvestment(rank) {
+  const parts = pick([[1, 2, 3], [1, 2, 4], [1, 3, 5], [2, 3, 4], [2, 3, 5], [1, 4, 5], [2, 3, 7], [1, 2, 5]]);
+  const unit = pick([5000, 10000, 15000, 20000]);
+  const profitEach = pick([1000, 2000, 2500, 5000]);
+  const amounts = parts.map(part => part * unit);
+  if (new Set(amounts).size !== 3) return null;
+  const sum = amounts[0] + amounts[1] + amounts[2];
+  const partSum = parts[0] + parts[1] + parts[2];
+  const profit = profitEach * partSum;
+  const share = profitEach * parts[0];
+  const fa = fmtCents(amounts[0] * 100);
+  const fb = fmtCents(amounts[1] * 100);
+  const fc = fmtCents(amounts[2] * 100);
+  const fp = fmtCents(profit * 100);
+  const fs = fmtCents(share * 100);
+  const wrongs = [profitEach * parts[1], profitEach * parts[2], profit, share + unit, Math.round(profit / 3)]
+    .filter(value => value > 0 && value !== share)
+    .map(value => fmtCents(value * 100));
+  return makeQuestion({
+    rank,
+    tag: "Arithmetic",
+    prompt: `Three partners invest ${fa}, ${fb}, and ${fc}. A profit of ${fp} is split in proportion to those investments. What does the partner who invested ${fa} receive?`,
+    answer: fs,
+    wrongs,
+    why: `The investments total ${fmtCents(sum * 100)}. ${fa} is ${parts[0]} of ${partSum} equal parts of the profit, so the share is ${fs}.`
+  });
+}
+
+const RECIPE = [
+  { rank: 1, name: "month", make: () => genMonth(1) },
+  { rank: 2, name: "letter", make: () => genLetter(2) },
+  { rank: 3, name: "divide", make: () => genDivide(3) },
+  { rank: 4, name: "times", make: () => genTimes(4) },
+  { rank: 5, name: "fractionOf", make: () => genFractionOf(5) },
+  { rank: 6, name: "extreme", make: () => genExtreme(6) },
+  { rank: 7, name: "unit", make: () => genUnit(7) },
+  { rank: 8, name: "percent", make: () => genPercent(8) },
+  { rank: 9, name: "divide2", make: () => genDivide(9) },
+  { rank: 10, name: "times2", make: () => genTimes(10) },
+  { rank: 11, name: "change", make: () => genChange(11) },
+  { rank: 12, name: "miles", make: () => genMiles(12) },
+  { rank: 13, name: "average", make: () => genAverage(13) },
+  { rank: 14, name: "rope", make: () => genRope(14) },
+  { rank: 15, name: "meeting", make: () => genMeeting(15) },
+  { rank: 16, name: "weekday", make: () => genWeekday(16) },
+  { rank: 17, name: "seriesAdd", make: () => genSeriesAdd(17) },
+  { rank: 18, name: "squares", make: () => genSquares(18) },
+  { rank: 19, name: "profit", make: () => genProfit(19) },
+  { rank: 20, name: "markup", make: () => genMarkup(20) },
+  { rank: 21, name: "alpha", make: () => genAlpha(21) },
+  { rank: 22, name: "duplicates", make: () => genDuplicates(22) },
+  { rank: 23, name: "speed", make: () => genSpeed(23) },
+  { rank: 24, name: "appointments", make: () => genAppointments(24) },
+  { rank: 25, name: "combo", make: () => genCombo(25) },
+  { rank: 26, name: "fractionAdd", make: () => genFractionAdd(26) },
+  { rank: 27, name: "seriesDouble", make: () => genSeriesDouble(27) },
+  { rank: 28, name: "daySimple", make: () => genDaySimple(28) },
+  { rank: 29, name: "ageRatio", make: () => genAgeRatio(29) },
+  { rank: 30, name: "box", make: () => genBox(30) },
+  { rank: 31, name: "weekday2", make: () => genWeekday(31) },
+  { rank: 32, name: "seriesAdd2", make: () => genSeriesAdd(32) },
+  { rank: 33, name: "work", make: () => genWork(33) },
+  { rank: 34, name: "ageSum", make: () => genAgeSum(34) },
+  { rank: 35, name: "seriesGrow", make: () => genSeriesGrow(35) },
+  { rank: 36, name: "digit", make: () => genDigit(36) },
+  { rank: 37, name: "fractionAdd2", make: () => genFractionAdd(37) },
+  { rank: 38, name: "ageFuture", make: () => genAgeFuture(38) },
+  { rank: 39, name: "upDown", make: () => genUpDown(39) },
+  { rank: 40, name: "tank", make: () => genTank(40) },
+  { rank: 41, name: "twoLeg", make: () => genTwoLeg(41) },
+  { rank: 42, name: "work2", make: () => genWork(42) },
+  { rank: 43, name: "dayHard", make: () => genDayHard(43) },
+  { rank: 44, name: "investment", make: () => genInvestment(44) },
+  { rank: 45, name: "digit2", make: () => genDigit(45) },
+  { rank: 46, name: "ageFuture2", make: () => genAgeFuture(46) },
+  { rank: 47, name: "upDown2", make: () => genUpDown(47) },
+  { rank: 48, name: "twoLeg2", make: () => genTwoLeg(48) },
+  { rank: 49, name: "seriesGrow2", make: () => genSeriesGrow(49) },
+  { rank: 50, name: "investment2", make: () => genInvestment(50) }
+];
+
+function bandOf(rank) {
+  if (rank <= 14) return 1;
+  if (rank <= 32) return 2;
+  return 3;
+}
+
+function buildSitting(avoid) {
+  if (RECIPE.length !== 50) throw new Error("recipe " + RECIPE.length);
+  if (!WORK_PAIRS.length || !HARMONIC.length || !AGE_FUTURE.length) throw new Error("empty tables");
+  const skip = avoid && typeof avoid.has === "function" ? avoid : new Set();
+  const used = new Set();
+  const made = [];
+  const extraSlots = {
+    divide2: 1,
+    times2: 1,
+    weekday2: 2,
+    seriesAdd2: 2,
+    fractionAdd2: 3,
+    ageFuture2: 3,
+    digit2: 3,
+    work2: 3,
+    upDown2: 3,
+    twoLeg2: 3
+  };
+  for (const spec of RECIPE) {
+    let item = null;
+    const slotBand = extraSlots[spec.name];
+    if (slotBand && typeof EXTRA !== "undefined") {
+      const wordTags = new Set(["Opposite", "Verbal", "Analogy", "Odd one out", "Proverb", "Logic"]);
+      let verbal = EXTRA.filter(q => q.band === slotBand && wordTags.has(q.tag) && !used.has(q.prompt) && !skip.has(q.prompt));
+      if (!verbal.length) verbal = EXTRA.filter(q => q.band === slotBand && !used.has(q.prompt) && !skip.has(q.prompt));
+      if (verbal.length) {
+        const picked = verbal[Math.floor(Math.random() * verbal.length)];
+        item = {
+          rank: spec.rank,
+          tag: picked.tag,
+          prompt: picked.prompt,
+          choices: picked.choices.slice(),
+          answer: picked.answer,
+          why: picked.why || ""
+        };
+      }
+    }
+    for (let i = 0; i < 80 && !item; i++) {
+      const got = spec.make();
+      if (!got || got.rank !== spec.rank) continue;
+      if (used.has(got.prompt) || skip.has(got.prompt)) continue;
+      item = got;
+    }
+    if (!item) {
+      for (let i = 0; i < 80 && !item; i++) {
+        const got = spec.make();
+        if (!got || got.rank !== spec.rank || used.has(got.prompt)) continue;
+        item = got;
+      }
+    }
+    if (!item) throw new Error("Could not build " + spec.name);
+    used.add(item.prompt);
+    made.push(item);
+  }
+  const keyed = made.map(q => ({ q, band: bandOf(q.rank), tie: Math.random() }));
+  keyed.sort((a, b) => a.band - b.band || a.tie - b.tie);
+  return keyed.map(entry => entry.q);
+}
+
+// ---- page ----
+const list = document.getElementById("list");
+const score = document.getElementById("score");
+const timerEl = document.getElementById("timer");
+const startBtn = document.getElementById("start");
+const resetBtn = document.getElementById("reset");
+const nextBtn = document.getElementById("next");
+const nav = document.getElementById("nav");
+const intro = document.getElementById("intro");
+const progress = document.getElementById("progress");
+const lede = document.querySelector(".lede");
+const ledeText = lede.textContent;
+let questions = [];
+let remaining = 12 * 60;
+let tick = null;
+let current = 0;
+let finished = false;
+const letters = ["A", "B", "C", "D", "E", "F"];
+const SEEN_KEY = "cognitive-generated-seen";
+
+function loadSeen() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(SEEN_KEY) || "[]");
+    return new Set(Array.isArray(raw) ? raw : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function saveSeen(set) {
+  try {
+    localStorage.setItem(SEEN_KEY, JSON.stringify([...set].slice(-4000)));
+  } catch {
+    // Finished questions stay out until the page is closed.
+  }
+}
+
+let seen = loadSeen();
+
+function toCard(q) {
+  return {
+    tag: q.tag,
+    prompt: q.prompt,
+    choices: q.choices.slice(),
+    answerText: q.answer,
+    answer: -1,
+    why: q.why,
+    images: [],
+    picked: null,
+    revealed: false
+  };
+}
+
+function buildCard(q, i) {
+  const card = document.createElement("article");
+  const tag = document.createElement("p");
+  tag.className = "tag";
+  tag.textContent = finished
+    ? `${q.tag} · ${i + 1} of ${questions.length}`
+    : `Question ${i + 1} of ${questions.length}`;
+  const prompt = document.createElement("p");
+  prompt.className = "prompt";
+  prompt.textContent = q.prompt;
+  const choices = document.createElement("div");
+  choices.className = "choices";
+  q.choices.forEach(() => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "choice";
+    button.addEventListener("click", () => choose(q, choices, button));
+    choices.appendChild(button);
+  });
+  const why = document.createElement("p");
+  why.className = "why";
+  why.hidden = true;
+  card.append(tag, prompt, choices, why);
+  q.card = card;
+  q.whyEl = why;
+  deal(q);
+  paint(q);
+  return card;
+}
+
+function showCurrent() {
+  list.replaceChildren(buildCard(questions[current], current));
+  progress.textContent = `Question ${current + 1} of ${questions.length}`;
+  nextBtn.textContent = current === questions.length - 1 ? "End the Test" : "Next";
+  nav.hidden = false;
+  intro.hidden = true;
+}
+
+function showReview() {
+  list.replaceChildren();
+  questions.forEach((q, i) => list.appendChild(buildCard(q, i)));
+  nav.hidden = true;
+  intro.hidden = false;
+  progress.textContent = "";
+}
+
+function deal(q) {
+  if (!q.shown) {
+    const shown = q.choices.slice();
+    for (let i = shown.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shown[i], shown[j]] = [shown[j], shown[i]];
+    }
+    q.shown = shown;
+    q.answer = shown.indexOf(q.answerText);
+  }
+  q.card.querySelectorAll("button.choice").forEach((button, j) => {
+    button.textContent = `${letters[j]}. ${q.shown[j]}`;
+  });
+}
+
+function paint(q) {
+  const right = q.picked === q.answer;
+  q.card.querySelectorAll("button.choice").forEach((button, j) => {
+    button.disabled = q.revealed;
+    button.classList.toggle("selected", !q.revealed && q.picked === j);
+    button.classList.toggle("correct", q.revealed && j === q.answer);
+    button.classList.toggle("wrong", q.revealed && q.picked === j && j !== q.answer);
+  });
+  if (!q.revealed) {
+    q.whyEl.hidden = true;
+    q.whyEl.className = "why";
+    q.whyEl.textContent = "";
+    return;
+  }
+  const mark = q.picked === null ? "Answer." : (right ? "Correct." : "Wrong.");
+  const tone = q.picked !== null && !right ? "bad" : "ok";
+  q.whyEl.hidden = false;
+  q.whyEl.className = `why ${tone}`;
+  q.whyEl.innerHTML = `<span class="mark">${mark}</span>${q.why ? " " + escapeHtml(q.why) : ""}`;
+}
+
+function escapeHtml(text) {
+  return text.replace(/[&<>]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[ch]));
+}
+
+function choose(q, choices, button) {
+  if (q.revealed || finished) return;
+  q.picked = [...choices.children].indexOf(button);
+  paint(q);
+}
+
+function updateScore() {
+  const correct = questions.filter(q => q.picked === q.answer).length;
+  score.textContent = `${correct} / ${questions.length} correct`;
+}
+
+function format(seconds) {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${String(s).padStart(2, "0")}`;
+}
+
+function stopTimer() {
+  if (tick) clearInterval(tick);
+  tick = null;
+  remaining = 12 * 60;
+  timerEl.textContent = "12:00";
+  timerEl.classList.remove("done");
+  document.getElementById("clock").classList.remove("ended");
+  document.querySelector(".clock-label").textContent = "Time left";
+  startBtn.disabled = false;
+}
+
+function advance() {
+  if (finished) return;
+  if (current < questions.length - 1) {
+    current += 1;
+    showCurrent();
+    window.scrollTo(0, 0);
+    return;
+  }
+  endTest();
+}
+
+function endTest() {
+  if (finished) return;
+  finished = true;
+  if (tick) clearInterval(tick);
+  tick = null;
+  startBtn.disabled = true;
+  if (remaining <= 0) {
+    remaining = 0;
+    timerEl.textContent = "0:00";
+    timerEl.classList.add("done");
+  }
+  document.getElementById("clock").classList.add("ended");
+  document.querySelector(".clock-label").textContent = "Ended";
+  questions.forEach(q => {
+    q.revealed = true;
+    seen.add(q.prompt);
+  });
+  saveSeen(seen);
+  showReview();
+  updateScore();
+  showResults();
+}
+
+function resultItem(q, i) {
+  const item = document.createElement("div");
+  item.className = "item";
+  const title = document.createElement("p");
+  const snippet = q.prompt.replace(/\s+/g, " ");
+  title.textContent = `${i + 1}. ${snippet.length > 160 ? snippet.slice(0, 160) + "…" : snippet}`;
+  const answer = document.createElement("p");
+  answer.className = "key";
+  answer.textContent = `Correct: ${letters[q.answer]}. ${q.shown[q.answer]}`;
+  item.append(title, answer);
+  return { item, answer };
+}
+
+function showResults() {
+  const wrong = document.getElementById("results-wrong");
+  const right = document.getElementById("results-right");
+  wrong.replaceChildren();
+  right.replaceChildren();
+  let correctCount = 0;
+  questions.forEach((q, i) => {
+    const { item, answer } = resultItem(q, i);
+    if (q.picked === q.answer) {
+      correctCount += 1;
+      right.appendChild(item);
+      return;
+    }
+    const yours = document.createElement("p");
+    yours.className = "you";
+    yours.textContent = q.picked === null
+      ? "You: no answer"
+      : `You: ${letters[q.picked]}. ${q.shown[q.picked]}`;
+    answer.before(yours);
+    wrong.appendChild(item);
+  });
+  const blank = (parent) => {
+    if (parent.children.length) return;
+    const item = document.createElement("p");
+    item.textContent = "None.";
+    parent.appendChild(item);
+  };
+  blank(wrong);
+  blank(right);
+  document.getElementById("results-summary").textContent =
+    `${correctCount} / ${questions.length} correct. Time left ${format(remaining)}.`;
+  document.getElementById("results").showModal();
+}
+
+function newSitting() {
+  stopTimer();
+  finished = false;
+  current = 0;
+  list.replaceChildren();
+  nav.hidden = true;
+  intro.hidden = false;
+  progress.textContent = "";
+  score.textContent = "";
+  const dialog = document.getElementById("results");
+  if (dialog.open) dialog.close();
+  let made = null;
+  try {
+    made = buildSitting(seen);
+  } catch {
+    made = null;
+  }
+  questions = (made || []).map(toCard);
+  lede.textContent = questions.length === 50
+    ? ledeText
+    : "The question set did not build. Reload the page.";
+  startBtn.disabled = questions.length !== 50;
+  window.scrollTo(0, 0);
+}
+
+startBtn.addEventListener("click", () => {
+  if (tick || finished || !questions.length) return;
+  startBtn.disabled = true;
+  current = 0;
+  showCurrent();
+  tick = setInterval(() => {
+    remaining -= 1;
+    timerEl.textContent = format(Math.max(remaining, 0));
+    if (remaining <= 0) endTest();
+  }, 1000);
+});
+
+nextBtn.addEventListener("click", advance);
+resetBtn.addEventListener("click", newSitting);
+newSitting();
+
+</script>
+</body>
+</html>
